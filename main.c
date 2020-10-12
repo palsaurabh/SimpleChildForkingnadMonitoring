@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/wait.h>
+#include <sys/time.h>
 
 typedef enum
 {
@@ -95,10 +95,10 @@ int main()
     int             processStatus;
     int             relaunchProcess = 0;
 
-    strcpy(processLaunchedList[0].processExecName, "operatorOverloadingPractice.exe");
-    strcpy(processLaunchedList[0].processExecName, "operatorOverloadingPractice.exe1");
-    strcpy(processLaunchedList[0].processExecName, "operatorOverloadingPractice.exe2");
-    strcpy(processLaunchedList[0].processExecName, "operatorOverloadingPractice.exe3");
+    strcpy(processLaunchedList[0].processExecName, "helloworld");
+    strcpy(processLaunchedList[1].processExecName, "helloworld");
+    strcpy(processLaunchedList[2].processExecName, "helloworld");
+    strcpy(processLaunchedList[3].processExecName, "helloworld");
 
     printf("Parent process PID = %d\n", getpid());
     for (int count = 0; count < (int)(PROCESS_MAX); count++)
