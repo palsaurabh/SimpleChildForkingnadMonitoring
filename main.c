@@ -90,7 +90,7 @@ int main()
     pid_t           forkReturnedPID;
     pid_t           crashedPID[PROCESS_MAX];
     processData     processLaunchedList[PROCESS_MAX];
-    int             *processStatus = NULL;
+    int             processStatus;
     int             relaunchProcess = 0;
 
     const char execList[PROCESS_MAX][100] = {".\\operatorOverloadingPractice.exe",
@@ -142,7 +142,7 @@ int main()
     {
         for (int count = 0; count < PROCESS_MAX; count++)
         {
-            crashedPID[count] = waitpid(-1, processStatus, WNOHANG);
+            crashedPID[count] = waitpid(-1, &processStatus, WNOHANG);
             if(crashedPID[count] < 0)
             {
                 printf("Error in waitpid()\n");
