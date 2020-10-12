@@ -95,6 +95,13 @@ int main()
     int             processStatus;
     int             relaunchProcess = 0;
 
+	/*
+	 * Signal handling
+	 */
+	if (signal(SIGINT, sigHandler) == SIG_ERR)
+		printf("\ncan't catch SIGINT\n");
+
+
     strcpy(processLaunchedList[0].processExecName, "helloworld");
     strcpy(processLaunchedList[1].processExecName, "helloworld");
     strcpy(processLaunchedList[2].processExecName, "helloworld");
