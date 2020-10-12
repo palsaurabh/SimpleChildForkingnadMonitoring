@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -20,6 +21,7 @@ typedef struct
     procName    processName;
     pid_t       PID;
     long int    timeofLaunch;
+    char        processExecName[100];
 }processData;
 
 int runmain = 1;
@@ -48,7 +50,7 @@ void terminateAllChildProcess(processData *processLaunchedList)
     }
 }
 
-void processMonitor(processData *processLaunchedList, pid_t pid, const char *execList[])
+void processMonitor(processData *processLaunchedList, pid_t pid)
 {
     pid_t forkReturnedPID;
     for(int count = 0; count < PROCESS_MAX; count++)
@@ -67,7 +69,7 @@ void processMonitor(processData *processLaunchedList, pid_t pid, const char *exe
                 //Case of child process
                 //Provide some time between crash and relauch
                 sleep(1);
-                int ret = execv(execList[count], NULL);
+                int ret = execv(processLaunchedList[count].processExecName, NULL);
                 if(ret < 0)
                 {
                     printf("Error in relaunching child process\n");
@@ -93,10 +95,10 @@ int main()
     int             processStatus;
     int             relaunchProcess = 0;
 
-    const char execList[PROCESS_MAX][100] = {".\\operatorOverloadingPractice.exe",
-                                    ".\\operatorOverloadingPractice1.exe",
-                                    ".\\operatorOverloadingPractice2.exe",
-                                    ".\\operatorOverloadingPractice3.exe"};
+    strcpy(processLaunchedList[0].processExecName, "operatorOverloadingPractice.exe");
+    strcpy(processLaunchedList[0].processExecName, "operatorOverloadingPractice.exe1");
+    strcpy(processLaunchedList[0].processExecName, "operatorOverloadingPractice.exe2");
+    strcpy(processLaunchedList[0].processExecName, "operatorOverloadingPractice.exe3");
 
     printf("Parent process PID = %d\n", getpid());
     for (int count = 0; count < (int)(PROCESS_MAX); count++)
@@ -113,7 +115,7 @@ int main()
             {
                 //this is the child process where execve or other equivalent calls are to be made.
                 int ret;
-                ret = execv(execList[count], NULL);
+                ret = execv(processLaunchedList[count].processExecName, NULL);
                 if(ret < 0)
                 {
                     perror("Error:");
@@ -131,7 +133,7 @@ int main()
                 processLaunchedList[count].timeofLaunch = now.tv_sec;
                 processLaunchedList[count].processName = (procName)(count);
                 processLaunchedList[count].PID = forkReturnedPID;
-                printf("Launched Child process %s with PID : %d\n", execList[count], processLaunchedList[count].PID);
+                printf("Launched Child process %s with PID : %d\n", processLaunchedList[count].processExecName, processLaunchedList[count].PID);
                 break;
             }
         }
@@ -154,34 +156,26 @@ int main()
             else if(crashedPID[count] > 0)
             {
                 printf("Child process terminated with PID = %d\n", crashedPID[count]);
-                if(processStatus = NULL)
+                if (WIFEXITED(processStatus))
                 {
-                    printf("processStatus is NULL\n");
+                    printf("Child Process exited normally, not relaunching\n");
+                }
+                if(WIFSIGNALED(processStatus))
+                {
+                    int ret = WTERMSIG(processStatus);
+                    printf("Signal number that terminated the child process was : %x", ret);
+                    printf("relaunching the child process\n");
                     relaunchProcess = 1;
                 }
-                else
+                if(WIFSTOPPED(processStatus))
                 {
-                    if (WIFEXITED(processStatus))
-                    {
-                        printf("Child Process exited normally, not relaunching\n");
-                    }
-                    if(WIFSIGNALED(processStatus))
-                    {
-                        int ret = WTERMSIG(processStatus);
-                        printf("Signal number that terminated the child process was : %x", ret);
-                        printf("relaunching the child process\n");
-                        relaunchProcess = 1;
-                    }
-                    if(WIFSTOPPED(processStatus))
-                    {
-                        int ret = WSTOPSIG(processStatus);
-                        printf("Signal number that stopped the child process was: %x\n", ret);
-                        relaunchProcess = 1;
-                    }
+                    int ret = WSTOPSIG(processStatus);
+                    printf("Signal number that stopped the child process was: %x\n", ret);
+                    relaunchProcess = 1;
                 }
                 if(relaunchProcess)
                 {
-                    processMonitor(processLaunchedList, crashedPID[count], execList);
+                    processMonitor(processLaunchedList, crashedPID[count]);
                     relaunchProcess = 0;
                 }
             }
