@@ -30,7 +30,7 @@ void signalHandler(int signo)
     if(signo == SIGINT)
         printf("Received sigint\n");
 
-    int runmain = 0;
+	runmain = 0;
 }
 
 void terminateAllChildProcess(processData *processLaunchedList)
@@ -98,7 +98,7 @@ int main()
 	/*
 	 * Signal handling
 	 */
-	if (signal(SIGINT, sigHandler) == SIG_ERR)
+	if (signal(SIGINT, signalHandler) == SIG_ERR)
 		printf("\ncan't catch SIGINT\n");
 
 
